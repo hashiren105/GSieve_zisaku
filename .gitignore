@@ -13,3 +13,7 @@ obj/
 # テストファイルは開発途中に使った物
 tests/
 test.sh
+
+# 前バージョン
+101_GaussSieve/
+
