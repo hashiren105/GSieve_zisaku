@@ -1,6 +1,7 @@
 #include <NTL/mat_ZZ.h>
+#include <NTL/LLL.h>
 #include "tool.h"
-#include "kleinSamplar.h"
+#include "gaussSieve.h"
 #include <iostream>
 
 using namespace std;
@@ -10,45 +11,52 @@ int main(int argc, char *argv[])
 {
     RR::SetPrecision(256);
 
-    if (argc != 3)
+    if (argc != 2)
     {
-        cerr << "Usage: " << argv[0] << " <input_file> <output_file>" << endl;
+        cerr << "Usage: " << argv[0] << " <input_file>" << endl;
         return 1;
     }
 
     string input_file = argv[1];
-    string output_file = argv[2];
 
     mat_ZZ B;
-
-    // Read basis using tool.cpp function
     if (!read_basis<ZZ>(input_file, B))
     {
         cerr << "Error: Failed to read basis from " << input_file << endl;
         return 1;
     }
 
-    // Output basis to stdout
+    {
+        ZZ det_unused;
+        double delta = 0.99;
+        long a = static_cast<long>(delta * 100);
+        long b = 100;
+        LLL(det_unused, B, a, b, 0);
+    }
+
     cout << "Loaded basis:" << endl;
     cout << B << endl;
-
     RR gh = computeGH(B);
     cout << "Gaussian Heuristic: " << gh << endl;
 
-    // σ ≈ 0.3325765549e121 (n = 40)
-    RR sigma = to_RR("0.3325765549e121");
-    vec_RR c_target;
-    c_target.SetLength(B.NumCols());
-    for (long i = 0; i < c_target.length(); ++i)
-    {
-        c_target[i] = 0;
-    }
+    GaussSieveConfig config;
+    config.sigma = to_RR("600");
+    config.mu = 1.05;
+    config.maxCycles = 1000;
+    config.logEveryIteration = true;
+    config.useGHStop = true;
 
-    vec_ZZ v = KleinSampler(B, sigma, c_target);
+    RR target_norm = to_RR(config.mu) * gh;
+    cout << "Target mu: " << config.mu << endl;
+    cout << "Target norm (mu * GH): " << target_norm << endl;
 
-    cout << "Sampled vector v:" << endl;
-    cout << v << endl;
+    vec_ZZ shortest = gaussSieveMain(B, config);
+
+    cout << "Shortest vector (approx):" << endl;
+    cout << shortest << endl;
+    RR shortest_norm = Computenorm(shortest);
+    cout << "Shortest norm: " << shortest_norm << endl;
+    cout << "Shortest/GH ratio: " << (shortest_norm / gh) << endl;
 
     return 0;
 }
-

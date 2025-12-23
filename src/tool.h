@@ -12,6 +12,7 @@
 #include <vector>
 #include <stack>
 #include <list>
+#include <cctype>
 
 using namespace std;
 using namespace NTL;
@@ -43,6 +44,15 @@ bool read_basis(const string& input_path, Mat<T>& B) {
     while (getline(in, line)) {
         vector<T> row;
         string num;
+        string trimmed = line;
+        size_t start = trimmed.find_first_not_of(" \t\r\n");
+        if (start == string::npos)
+            continue;
+        size_t end = trimmed.find_last_not_of(" \t\r\n");
+        trimmed = trimmed.substr(start, end - start + 1);
+
+        if (trimmed == "]")
+            break;
         for (char ch : line) {
             if (isdigit(ch) || ch == '-' || ch == '+') {
                 num += ch;
@@ -55,8 +65,15 @@ bool read_basis(const string& input_path, Mat<T>& B) {
             row.push_back(conv<T>(num.c_str()));
         }
         if (!row.empty()) {
+            if (!temp_rows.empty() && row.size() != temp_rows[0].size())
+                continue;
             temp_rows.push_back(row);
         }
+    }
+
+    if (temp_rows.empty()) {
+        cerr << "Input file " << input_path << " contains no numeric rows." << endl;
+        return false;
     }
 
     long rows = temp_rows.size();

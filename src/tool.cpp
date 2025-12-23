@@ -1,4 +1,5 @@
 #include "tool.h"
+#include <cmath>
 
 vec_RR to_RR(const vec_ZZ &v)
 {
@@ -22,16 +23,29 @@ mat_RR to_RR(const mat_ZZ &M)
 RR computeGH(const mat_ZZ &B)
 {
     long n = B.NumRows();
+    if (n == 0) {
+        return RR(0);
+    }
 
-    ZZ detB_ZZ = determinant(B);
-    RR detB = to_RR(detB_ZZ);
-    RR pi = ComputePi_RR();
-    RR e = exp(to_RR(1));
+    mat_ZZ Bt;
+    transpose(Bt, B);
+    mat_ZZ G;
+    mul(G, B, Bt);
+    ZZ detG_ZZ = determinant(G);
+    if (IsZero(detG_ZZ)) {
+        return RR(0);
+    }
 
-    RR coeff = sqrt(to_RR(n) / (2 * pi * e));
-    RR vol_root = pow(abs(detB), to_RR(1.0) / n);
+    RR detG = abs(to_RR(detG_ZZ));
+    RR vol = sqrt(detG);
 
-    return coeff * vol_root;
+    double nd = static_cast<double>(n);
+    double pi = std::acos(-1.0);
+    double logVn = (nd / 2.0) * std::log(pi) - std::lgamma(nd / 2.0 + 1.0);
+
+    RR log_vol = log(vol);
+    RR log_gh = (log_vol - to_RR(logVn)) / to_RR(n);
+    return exp(log_gh);
 }
 
 bool Reduce(vec_ZZ *p1, const vec_ZZ &p2)
