@@ -6,6 +6,7 @@
 *.txt
 *.csv
 *.tsv
+*.out
 *.o
 obj/
 
