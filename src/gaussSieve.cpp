@@ -78,6 +78,10 @@ vec_ZZ gaussReduce(const vec_ZZ &p_in, std::vector<vec_ZZ> &L, std::vector<vec_Z
             vec_ZZ p_minus_vi = subtract_vectors(p, vi);
             RR norm_diff = norm_squared_rr(p_minus_vi);
 
+            if (is_zero_vector(p_minus_vi)) {
+                return p_minus_vi;
+            }
+
             if (norm_vi < norm_p && norm_diff < norm_p) {
                 p = p_minus_vi;
                 norm_p = norm_diff;
