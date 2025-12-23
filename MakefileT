@@ -1,0 +1,38 @@
+CXX = g++
+CXXFLAGS = -Wall -O2 -std=c++17 \
+           -I../src \
+           -I$(HOME)/local/ntl/include
+
+LDFLAGS = -L$(HOME)/local/ntl/lib \
+          -L/opt/homebrew/lib \
+          -lntl -lgmp
+
+NUM ?=
+
+ifeq ($(NUM),)
+$(error NUM is not set. Please provide it via command line or script.)
+endif
+
+OBJDIR = obj
+INPUTDIR = input
+OUTPUTDIR = output
+
+SRC = $(wildcard tests/$(NUM)*.cpp)
+TARGET = $(OBJDIR)/$(basename $(notdir $(SRC)))
+
+all: $(OBJDIR) $(INPUTDIR) $(OUTPUTDIR) $(TARGET)
+
+$(OBJDIR):
+	mkdir -p $(OBJDIR)
+
+$(INPUTDIR):
+	mkdir -p $(INPUTDIR)
+
+$(OUTPUTDIR):
+	mkdir -p $(OUTPUTDIR)
+
+$(TARGET): $(SRC)
+	$(CXX) $(CXXFLAGS) -o $@ $< src/tool.cpp src/kleinSamplar.cpp $(LDFLAGS)
+
+clean:
+	rm -f $(TARGET) $(OBJDIR)/*

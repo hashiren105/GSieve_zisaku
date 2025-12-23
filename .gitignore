@@ -1,0 +1,13 @@
+# 全ての.DS_Storeをignore
+**/.DS_Store
+
+# 精製物・入力基底など
+*.log
+*.txt
+*.csv
+*.tsv
+*.o
+
+# テストファイルは開発途中に使った物
+tests/
+test.sh
