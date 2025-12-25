@@ -16,4 +16,4 @@ test.sh
 
 # 前バージョン
 101_GaussSieve/
-
+.venv/
